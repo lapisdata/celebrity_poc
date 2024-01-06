@@ -3,7 +3,7 @@ import json
 import requests
 from parsel import Selector
 from datetime import datetime
-import pandas as pd
+
 
 def parse(response):
 
@@ -21,8 +21,8 @@ def parse(response):
     # Set to keep track of existing profile URLs
     existing_profile_urls = set()
     
-    # Loop through celebrity links
-    for celebrity_url in celeberities_links:
+    # Loop through 100 celebrity links
+    for celebrity_url in celeberities_links[0:100]:
         celebrity_url = celebrity_url.xpath('./@href').get('')
 
         # Check if the profile URL is not in the set
@@ -33,6 +33,7 @@ def parse(response):
             # Add the URL to the set
             existing_profile_urls.add(celebrity_url)
             
+            
         else:
             new_profile = False
             celebrity_parsing(celebrity_url, new_profile, popular_links)
@@ -41,7 +42,7 @@ def parse(response):
     # Convert the scraped data to JSON format
     celebrity_json_data = json.dumps(celebrity_output, indent=2, ensure_ascii=False)
     
-    # breakpoint()
+    
     # Save JSON data to a file
     with open('Celebritymafia_output.json', 'w', encoding='utf-8-sig') as json_file:json_file.write(celebrity_json_data)
 
@@ -81,9 +82,8 @@ def celebrity_parsing(celebrity_url, new_profile, popular_links):
 
                     # Format the date in MM/DD/YYYY format
                     date = parsed_date.strftime('%m/%d/%Y')
-                images=profile_response_1.xpath('//div[@class="image-box"]/a/@href').getall()
-                full_image=profile_response_1.xpath('//div[@class="image-gallery"]//a/@href').get('')
-                images.append(full_image)
+                images=profile_response_1.xpath('//div[@class="entry-content"]//div/a/img/@src').getall()
+                
                 profile = {
                     'name': ' '.join(collection_name.split(' ')[0:-1]),
                     'date': date,
